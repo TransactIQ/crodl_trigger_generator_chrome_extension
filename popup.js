@@ -142,32 +142,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const plots = getPlotValues(values.indicator, values.side);
 
-        // Generate the trigger JSON
-        let trigger = {
-            trigger_id: values.triggerId,
-            trigger_quantity_value: values.triggerQuantityType === 'assetIndicator' ? plots.proposed : parseFloat(values.triggerQuantityValue),
-            trigger_quantity_type: values.triggerQuantityType === 'assetIndicator' ? 'asset' : values.triggerQuantityType,
-            trigger_order_type: values.entryMode,
-            trigger_leverage_type: "isolated",
-            trigger_leverage_value: parseFloat(values.leverageValue),
-            trigger_tp_type: values.tpType,
-            trigger_tp_value: values.tpType === 'price' ? plots.tp : parseFloat(values.tpValue),
-            trigger_sl_type: values.slType,
-            trigger_sl_value: values.slType === 'price' ? plots.sl : parseFloat(values.slValue),
-            trigger_opposite_close: values.oppositeClose
-        };
+        let trigger = `{
+            "trigger_id": "${values.triggerId}",
+            "trigger_quantity_value": ${values.triggerQuantityType === 'assetIndicator' ? plots.proposed : parseFloat(values.triggerQuantityValue)},
+            "trigger_quantity_type": ${values.triggerQuantityType === 'assetIndicator' ? '"asset"' : '"' + values.triggerQuantityType + '"'},
+            "trigger_order_type": "${values.entryMode}",
+            "trigger_leverage_type": "${values.leverageType}",
+            "trigger_leverage_value": ${parseFloat(values.leverageValue)},
+            "trigger_tp_type": "${values.tpType}",
+            "trigger_tp_value": ${values.tpType === 'price' ? plots.tp  : parseFloat(values.tpValue)},
+            "trigger_sl_type": "${values.slType}",
+            "trigger_sl_value": ${values.slType === 'price' ? plots.sl : parseFloat(values.slValue)},
+            "trigger_opposite_close": ${ values.oppositeClose}
+        }`;
 
-        // Add limit price if entry mode is limit
+
+
         if (values.entryMode === 'limit') {
-            trigger = {
-                trigger_limit_price: plots.entry,
-                trigger_cancel_unfilled: true,
-                ...trigger
-            };
+            trigger = trigger.replace('{', `{
+            "trigger_limit_price": ${plots.entry},
+            "trigger_cancel_unfilled": true,`);
         }
 
+
         // Format and display the output
-        document.getElementById('output').value = JSON.stringify(trigger, null, 4);
+        document.getElementById('output').value = trigger;
     });
 
     // Copy to clipboard functionality
