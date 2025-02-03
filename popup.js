@@ -57,30 +57,34 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('indicator').addEventListener('change', function() {
         const indicator = this.value;
         const quantityType = document.getElementById('triggerQuantityType');
-        const assetIndicatorOption = quantityType.querySelector('option[value="assetIndicator"]');
 
-        if (indicator === 'reversal' || indicator === 'counterstrike') {
-            assetIndicatorOption.style.display = 'block';
+        const rMultipleGroup = document.getElementById('rMultipleGroup');
+
+        if(indicator === "impulse") {
+            rMultipleGroup.classList.remove("hidden");
         } else {
-            if (quantityType.value === 'assetIndicator') {
-                quantityType.value = 'asset';
-                document.getElementById('triggerQuantityValue').value = '';
-            }
-            assetIndicatorOption.style.display = 'none';
+            rMultipleGroup.classList.add("hidden");
         }
+
     });
 
     // Generate trigger
     document.getElementById('generate').addEventListener('click', function() {
-        const getPlotValues = (indicator, side) => {
+        const getPlotValues = (indicator, side, rMultiple) => {
             switch (indicator) {
                 case "impulse":
-                    return {
+                    const impulse = {
                         entry: side === "buy" ? '{{plot("[Automation] Long Entry Price")}}' : '{{plot("[Automation] Short Entry Price")}}',
                         sl: side === "buy" ? '{{plot("[Automation] Initial Stop And Trailing Stop Price Long")}}' : '{{plot("[Automation] Initial Stop And Trailing Stop Price Short")}}',
-                        tp: side === "buy" ? '{{plot("[Automation] RR Profit Target Long (Optional)")}}' : '{{plot("[Automation] RR Profit Target Short (Optional)")}}',
+                        tp: "",
                         proposed: side === "buy" ? '{{plot("Ideal Amount Long Position")}}' : '{{plot("Ideal Amount Short Position")}}',
                     };
+
+                    if (indicator === "impulse" && rMultiple) {
+                        impulse.tp = side === "buy" ? '{{plot("[Automation] RR Profit Target Long (Optional)")}}' : '{{plot("[Automation] RR Profit Target Short (Optional)")}}';
+                    }
+
+                    return impulse
                 case "novareversion":
                     return {
                         entry: side === "buy" ? '{{plot("[Automation Reversion] Long Entry Price")}}' : '{{plot("[Automation Reversion] Short Entry Price")}}',
@@ -128,6 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
             slType: document.getElementById('slType').value,
             slValue: document.getElementById('slValue').value,
             oppositeClose: document.getElementById('oppositeClose').checked,
+            rMultiple: document.getElementById('rmultiple').checked,
         };
 
         // Validate required fields
@@ -140,7 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        const plots = getPlotValues(values.indicator, values.side);
+        const plots = getPlotValues(values.indicator, values.side, values.rMultiple);
 
         let trigger = `{
             "trigger_id": "${values.triggerId}",
@@ -149,13 +154,16 @@ document.addEventListener('DOMContentLoaded', function() {
             "trigger_order_type": "${values.entryMode}",
             "trigger_leverage_type": "${values.leverageType}",
             "trigger_leverage_value": ${parseFloat(values.leverageValue)},
-            "trigger_tp_type": "${values.tpType}",
-            "trigger_tp_value": ${values.tpType === 'price' ? plots.tp  : parseFloat(values.tpValue)},
             "trigger_sl_type": "${values.slType}",
             "trigger_sl_value": ${values.slType === 'price' ? plots.sl : parseFloat(values.slValue)},
             "trigger_opposite_close": ${ values.oppositeClose}
         }`;
 
+        if (values.indicator !== "impulse" || (values.indicator === "impulse" && values.rMultiple)) {
+            trigger = trigger.replace('{', `{
+            "trigger_tp_type": "${values.tpType}",
+            "trigger_tp_value": ${values.tpType === 'price' ? plots.tp  : parseFloat(values.tpValue)},`);
+        }
 
 
         if (values.entryMode === 'limit') {
@@ -163,7 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
             "trigger_limit_price": ${plots.entry},
             "trigger_cancel_unfilled": true,`);
         }
-
 
         // Format and display the output
         document.getElementById('output').value = trigger;

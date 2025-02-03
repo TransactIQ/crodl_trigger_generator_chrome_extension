@@ -164,7 +164,6 @@
         }
 
         .checkbox-group {
-            display: flex;
             align-items: center;
             gap: 8px;
         }
@@ -189,12 +188,16 @@
             <div class="form-group">
                 <label for="indicator">Indicator:</label>
                 <select id="indicator">
+                    <option value="reversal"  selected="selected">Reversal IQ</option>
                     <option value="impulse">Impulse IQ</option>
                     <option value="novareversion">Nova IQ (reversion)</option>
                     <option value="novatrend">Nova IQ (trend)</option>
-                    <option value="reversal">Reversal IQ</option>
                     <option value="counterstrike">Counter Strike IQ</option>
                 </select>
+            </div>
+            <div class="checkbox-group hidden" id="rMultipleGroup">
+                <input type="checkbox" id="rmultiple">
+                <label for="rmultiple">Use R multiple (RR)</label>
             </div>
 
             <div class="form-group">
@@ -221,10 +224,10 @@
             <div class="form-group">
                 <label for="triggerQuantityType">Quantity Type:</label>
                 <select id="triggerQuantityType">
+                    <option value="assetIndicator"  selected="selected">Asset by indicator calculation</option>
                     <option value="percentage">Percentage</option>
                     <option value="asset">Asset</option>
                     <option value="dollar">Dollar</option>
-                    <option value="assetIndicator" selected>Asset by indicator calculation</option>
                 </select>
             </div>
 
@@ -239,7 +242,7 @@
             <div class="form-group">
                 <label for="leverageType">Leverage Type:</label>
                 <select id="leverageType">
-                    <option value="isolated" selected>Isolated</option>
+                    <option value="isolated"  selected="selected">Isolated</option>
                     <option value="cross">Cross</option>
                 </select>
             </div>
@@ -252,7 +255,7 @@
             <div class="form-group">
                 <label for="tpType">TP Type:</label>
                 <select id="tpType">
-                    <option value="price" selected>Price by indicator</option>
+                    <option value="price" selected="selected">Price by indicator</option>
                     <option value="percentage">Percentage</option>
                     <option value="dollar">Profit in Dollar</option>
                 </select>
@@ -266,7 +269,7 @@
             <div class="form-group">
                 <label for="slType">SL Type:</label>
                 <select id="slType">
-                    <option value="price" selected>Price by indicator</option>
+                    <option value="price" selected="selected">Price by indicator</option>
                     <option value="percentage">Percentage</option>
                     <option value="dollar">Loss in Dollar</option>
                 </select>
